@@ -48,13 +48,10 @@ void SDRAMAnalyzer::WorkerThread()
   		mCLK->AdvanceToNextEdge();
 
     start_edge = mCLK->GetSampleNumber();
- 		mCLK->AdvanceToNextEdge();
-
-    fall = mCLK->GetSampleNumber();
-    mRAS->AdvanceToAbsPosition(fall);
-    mCAS->AdvanceToAbsPosition(fall);
-    mWE->AdvanceToAbsPosition(fall);
-    mCS->AdvanceToAbsPosition(fall);
+    mRAS->AdvanceToAbsPosition(start_edge);
+    mCAS->AdvanceToAbsPosition(start_edge);
+    mWE->AdvanceToAbsPosition(start_edge);
+    mCS->AdvanceToAbsPosition(start_edge);
 
     bits = 0;
     if(mRAS->GetBitState() == BIT_HIGH)
@@ -77,8 +74,8 @@ void SDRAMAnalyzer::WorkerThread()
       frame.mData1 = bits;
     }
 
-
  		mCLK->AdvanceToNextEdge();
+    mCLK->AdvanceToNextEdge();
 
     if(changed)
     {
