@@ -35,7 +35,10 @@ void SDRAMAnalyzer::WorkerThread()
   while(1)
   {
     U64 start_edge;
+    U64 last_transition;
     U64 fall;
+
+    int changed = 0;
     
     Frame frame;
 
@@ -63,22 +66,33 @@ void SDRAMAnalyzer::WorkerThread()
 
     if(mCS->GetBitState() == BIT_HIGH)
     {
+      if(frame.mData1 != NOP)
+        changed = 1;
       frame.mData1 = NOP;
     }
     else
     {
+      if(frame.mData1 != bits)
+        changed = 1;
       frame.mData1 = bits;
     }
 
+
  		mCLK->AdvanceToNextEdge();
 
-  	frame.mFlags = 0;
-  	frame.mStartingSampleInclusive = start_edge;
-  	frame.mEndingSampleInclusive = mCLK->GetSampleNumber();
+    if(changed)
+    {
+  	  frame.mFlags = 0;
+  	  frame.mStartingSampleInclusive = start_edge;
+  	  frame.mEndingSampleInclusive = mCLK->GetSampleNumber();
 
-  	mResults->AddFrame( frame );
-  	mResults->CommitResults();
-  	ReportProgress( frame.mEndingSampleInclusive );
+      mResults->AddFrame( frame );
+      mResults->CommitResults();
+      ReportProgress( frame.mEndingSampleInclusive );
+
+      last_transition = frame.mEndingSampleInclusive;
+    }
+
   }
 }
 
